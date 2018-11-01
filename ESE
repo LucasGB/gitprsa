@@ -1,0 +1,45 @@
+o quanto que o negativismo influencia na aceitação/rejeição de um Pull Request. Se isso influencia se o cara
+
+Se as reviews positivas/negativas de Pull-Requests o quanto isso contribui para as pessoas continaraem contribuindo.
+
+1. Tema
+A positividade/negatividade contida em reviews de Pull-Requests influencia na continuidade de contribuição de developers?
+
+2. Questões abordadas:
+    2.1 Projetos mais felizes atraem mais contribuidores?
+    2.2 Reviews positivos aumentam a quantidade de Pull-Requests aceitos?
+
+3. Metodologia
+    3.1 Selecionar um projeto open source grande (Google, Linux, Facebook, etc..)
+    3.2 Realizar uma coleta de Pull-Requests do projeto.
+    3.3 Extrair informações:
+        - Quem foi integrador,
+        - Quem foi o reviewer;
+        - Quando foi submetido;
+        - Quando foi fechado;
+        - Mensagens da conversa.
+    3.4 Classificar a polaridade sentimental de uma review de Pull-Request.
+    
+
+mostrar quantos prs foram aceitos.
+
+
+4. Resultados
+    4.1 Mostrar o estado atual de positividade acumulada do projeto.
+    4.2 Mostrar quantos Pull-Requests foram submetidos.
+    4.3 Mostrar quantos Pull-Requests foram aceitos.
+    4.4 Mostrar quantos Pull-Requests foram rejeitados.
+    4.5 Mostrar o número total de contribuidores ao longo do projeto.
+    4.2 Mostrar quantos newcomers estão contribuindo no projeto.
+
+    4. Plotar uma visualização que aglomera  map dos projetos com comentarios de PR positivos/negativos.
+(o estado atual e a analise temporal (quinzenal?)
+
+
+TODO:
+    - Conversar com a Aretha pra ver qual visualização seria mais cabível para representar os dados.
+    - Procurar alguma visualização temporal para os dados.
+    - Verificar a relação entre PR com arquivos em duas situações: closed and merged vs closed and unmerged.
+
+
+    PS: Valor de positividade associado ao valor de negatividade leva a qual das situaões.
