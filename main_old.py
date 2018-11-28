@@ -1,8 +1,4 @@
-from SentiCR.SentiCR import  SentiCR
-import pickle
-from git import *
-import os
-import pandas as pd
+
 
 #All examples are acutal code review comments from Go lang
 
@@ -29,43 +25,6 @@ sentences=["I'm not sure I entirely understand what you are saying. "+\
         "I don't think this is what I'm looking for.",
         "This doesn't work."]
 
-
-def classify(sentences):
-
-    saved_SentiCR_model = 'classifier_models/SentiCR_model.sav'
-    
-    if(os.path.exists(saved_SentiCR_model)):
-      sentiment_analyzer = pickle.load(open(saved_SentiCR_model, 'rb'))
-      print 'Loaded SentiCR model'
-    else:
-      sentiment_analyzer = SentiCR.SentiCR()
-      pickle.dump(sentiment_analyzer, open(saved_SentiCR_model, 'wb'))
-      print 'Saved model to file'
-
-    for sent in sentences:
-        score = sentiment_analyzer.get_sentiment_polarity(sent)
-        print(sent+"\n Score: "+str(score))
-
-
-if __name__ == '__main__':
-    #classify(sentences)
-
-    repositories = ['rails/rails']
-    pull_requests = []
-
-    for repository in repositories:
-      pull_requests = get_closed_pull_request_numbers_from_repo(repository)
-
-    
-    print pull_requests
-    
-    #pr = [str(34212), str(34227), str(34403)]
-    #a = filter_by_presence_of_changed_files(pr)
-    #print len(a)
-
-#    a = filter_by_presence_of_changed_files(pull_requests)
-#    print len(a)
-
-    #review_comments = get_review_comments_from_pull_request(str(34227))
-    
-    #classify(review_comments)  
+for sent in sentences:
+    score=sentiment_analyzer.get_sentiment_polarity(sent)
+    print(sent+"\n Score: "+str(score))
