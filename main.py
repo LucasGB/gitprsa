@@ -49,16 +49,23 @@ def classify(sentences):
 
 if __name__ == '__main__':
     #classify(sentences)
+    repositories = []
 
-    repositories = ['rails/rails']
-    pull_requests = []
+    with open('repositories/repositories.txt', 'r') as file:
+      repositories = file.read().splitlines()
 
-    for repository in repositories:
-      pull_requests = get_closed_pull_request_numbers_from_repo(repository)
+    print repositories
+    
+    #pull_requests = []
+
+    #for repository in repositories:
+     # pull_requests = get_closed_pull_request_numbers_from_repo(repository)
 
     
-    print pull_requests
+    #print pull_requests
     
+
+    ###########
     #pr = [str(34212), str(34227), str(34403)]
     #a = filter_by_presence_of_changed_files(pr)
     #print len(a)
