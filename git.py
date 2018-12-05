@@ -34,14 +34,12 @@ def get_closed_pull_request_numbers_from_repo(repositry):
 
 		try:
 			print response.links['next']['url']
-			response = requests.get(response.links['next']['url'], auth=('lucasgb','0c123d1e252bee8bda1227b83606f5ccf483fa9c'))
+			response = requests.get(response.links['next']['url'], auth=(user,token))
 		except:
 			print 'KeyError: next link not found. Returning results'
 			break
 
 	print 'Done.'
-
-	
 
 	return pull_requests
 
