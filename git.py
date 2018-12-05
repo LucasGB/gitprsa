@@ -1,5 +1,10 @@
 import requests
 
+user = ''
+token = ''
+with open('auth.txt', 'r') as file:
+	user, token = file.read().split(':')
+
 def get_repositories_by_forks(n):
 	print 'Fetching repositories by most forks...'
 	
@@ -16,7 +21,7 @@ def get_closed_pull_request_numbers_from_repo(repositry):
 	pull_requests = []
 
 	print ('https://api.github.com/repos/{}/{}/pulls?state=closed&page=1&per_page=100').format(full_name[0], full_name[1])	
-	response = requests.get( ('https://api.github.com/repos/{}/{}/pulls?state=closed&page=1&per_page=100').format(full_name[0], full_name[1]), auth=('lucasgb','0c123d1e252bee8bda1227b83606f5ccf483fa9c'))
+	response = requests.get( ('https://api.github.com/repos/{}/{}/pulls?state=closed&page=1&per_page=100').format(full_name[0], full_name[1]), auth=(user,token))
 
 	while True:
 		if response.ok:
@@ -46,7 +51,7 @@ def filter_by_presence_of_changed_files(pull_requests):
 	print 'Filtering pull requests by presence of changed files'
 
 	for pull_request in pull_requests:
-		response = requests.get('https://api.github.com/repos/rails/rails/pulls/' + pull_request, auth=('lucasgb','0c123d1e252bee8bda1227b83606f5ccf483fa9c'))
+		response = requests.get('https://api.github.com/repos/rails/rails/pulls/' + pull_request, auth=(user,token))
 
 		if response.ok:
 			if response.json()["changed_files"] > 0:
