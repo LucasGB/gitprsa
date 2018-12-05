@@ -4,8 +4,6 @@ from git import *
 import os
 import pandas as pd
 
-#All examples are acutal code review comments from Go lang
-
 sentences=["I'm not sure I entirely understand what you are saying. "+\
            "However, looking at file_linux_test.go I'm pretty sure an interface type would be easier for people to use.",
            "I think it always returns it as 0.",
@@ -59,6 +57,11 @@ if __name__ == '__main__':
 
     for repository in repositories:
       pull_requests = get_closed_pull_request_numbers_from_repo(repository)
+
+#      with open(repository, 'w') as file:
+   #     for pr in pull_requests:
+  #        file.write(pull_requests) 
+
 
     
     print pull_requests
