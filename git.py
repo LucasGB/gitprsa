@@ -22,6 +22,8 @@ def get_closed_pull_request_numbers_from_repo(repositry):
 		if response.ok:
 			for pr in response.json():
 				pull_requests.append(str(pr["number"]))
+				with open('repositories/{}_{}.txt'.format(full_name[0], full_name[1]), 'w') as output:
+					output.write(pull_requests)
 		else:
 			return response.raise_for_status()
 
@@ -34,8 +36,7 @@ def get_closed_pull_request_numbers_from_repo(repositry):
 
 	print 'Done.'
 
-	with open('{}_{}'.format(full_name[0], full_name[1]), 'w') as output:
-		output.write(pull_requests)
+	
 
 	return pull_requests
 

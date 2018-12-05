@@ -51,18 +51,17 @@ if __name__ == '__main__':
     #classify(sentences)
     repositories = []
 
+    # Load list of repositories to mine
     with open('repositories/repositories.txt', 'r') as file:
       repositories = file.read().splitlines()
-
-    print repositories
     
-    #pull_requests = []
+    pull_requests = []
 
-    #for repository in repositories:
-     # pull_requests = get_closed_pull_request_numbers_from_repo(repository)
+    for repository in repositories:
+      pull_requests = get_closed_pull_request_numbers_from_repo(repository)
 
     
-    #print pull_requests
+    print pull_requests
     
 
     ###########
