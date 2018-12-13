@@ -3,6 +3,7 @@ import pickle
 from git import *
 import os
 import pandas as pd
+import random
 
 sentences=["I'm not sure I entirely understand what you are saying. "+\
            "However, looking at file_linux_test.go I'm pretty sure an interface type would be easier for people to use.",
@@ -29,6 +30,7 @@ sentences=["I'm not sure I entirely understand what you are saying. "+\
 
 
 def classify(sentences):
+    polarities = []
 
     saved_SentiCR_model = 'classifier_models/SentiCR_model.sav'
     
@@ -42,7 +44,10 @@ def classify(sentences):
 
     for sent in sentences:
         score = sentiment_analyzer.get_sentiment_polarity(sent)
-        print(sent+"\n Score: "+str(score))
+        #print(sent+"\n Score: "+str(score))
+        polarities.append(score)
+
+    return polarities
 
 
 if __name__ == '__main__':
@@ -56,25 +61,106 @@ if __name__ == '__main__':
     pull_requests = []
 
     for repository in repositories:
-      pull_requests = get_closed_pull_request_numbers_from_repo(repository)
+      full_name = repository.split('/')
 
-#      with open(repository, 'w') as file:
-   #     for pr in pull_requests:
-  #        file.write(pull_requests) 
+#      get_closed_pull_request_numbers_from_repo(repository)
 
+      with open('repositories/{}_{}/{}_{}_pull_request_numbers.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1]), 'r') as file:
+           for line in file.readlines():
+            pull_requests.append(line)
 
-    
-    print pull_requests
-    
+      for pull_request in pull_requests:
+        status = verify_acceptance(repository, pull_request)
 
-    ###########
-    #pr = [str(34212), str(34227), str(34403)]
-    #a = filter_by_presence_of_changed_files(pr)
-    #print len(a)
+        if status == True:
+          with open('repositories/{}_{}/{}_{}_accepted_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1]), 'a') as output:
+            output.write(pull_request)
+#        elif status == False:
+#          with open('repositories/{}_{}/{}_{}_rejected_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1]), 'a') as output:
+#            output.write(pull_request)
+#        else:
+#            continue
 
-#    a = filter_by_presence_of_changed_files(pull_requests)
-#    print len(a)
+      accepted_prs = []
+      rejected_prs = []
 
-    #review_comments = get_review_comments_from_pull_request(str(34227))
-    
-    #classify(review_comments)  
+      with open('repositories/{}_{}/{}_{}_accepted_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1]), 'r') as file:
+        for line in file.readlines():
+          print 'a'
+          accepted_prs.append(line)
+
+      print len(accepted_prs)
+      with open('repositories/{}_{}/{}_{}_rejected_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1]), 'r') as file:
+        for line in file.readlines():
+          rejected_prs.append(line)
+      print len(rejected_prs)
+      sample_percentage = 0.2
+
+      sample_accepted_prs = random.sample(accepted_prs, int(len(accepted_prs) * sample_percentage))
+      sample_rejected_prs = random.sample(rejected_prs, int(len(rejected_prs) * sample_percentage))
+
+      print len(sample_accepted_prs)
+      print len(sample_rejected_prs)
+
+      with open('repositories/{}_{}/{}_{}_sampled_{}_accepted_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1], int(sample_percentage * 100)), 'a') as output:
+        for pr in sample_accepted_prs:
+          output.write(pr)
+
+      with open('repositories/{}_{}/{}_{}_sampled_{}_rejected_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1], int(sample_percentage * 100)), 'a') as output:
+        for pr in sample_rejected_prs:
+          output.write(pr)
+
+      '''
+      AP = Accepted and merged, mostly positive comments
+      AN = Accepted and merged, mostly negative comments
+      RP = Rejected and closed, mostly positive comments
+      RN = Rejected and closed, mostly negative comments
+      AT = Accepted and merged, tie between positive and negative comments
+      RT = Rejected and closed, tie between positive and negative comments
+      '''
+      AP = 0
+      RP = 0
+      AN = 0
+      RN = 0
+      AT = 0
+      RT = 0
+
+      for pr in sample_accepted_prs:
+        review_comments = get_review_comments_from_pull_request(pr)
+        print 'N comments: ',len(review_comments)
+        merged = verify_merged_at_attr_from_pull_request(repository, pr)
+
+        review_polarities = classify(review_comments)
+
+        print review_polarities[0]
+
+        n_positive_comments = review_polarities.count(0)
+        n_negative_comments = review_polarities.count(-1)
+
+        print 'POS: ',n_positive_comments
+        print 'NEG: ',n_negative_comments
+
+        if n_positive_comments > n_negative_comments and merged == True:
+          AP += 1
+        elif n_positive_comments > n_negative_comments and merged == False:
+          RP += 1
+        elif n_negative_comments > n_positive_comments and merged == True:
+          AN += 1
+        elif n_negative_comments > n_positive_comments and merged == False:
+          RN += 1
+        elif n_positive_comments == n_negative_comments and merged == True:
+          AT += 1
+        else:
+          RT += 1
+
+      print AP
+      print RP
+      print AN
+      print RN
+      print AT
+      print RT
+
+      with open('repositories/{}_{}/{}_{}_result.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1]), 'w') as output:
+        output.write('AP = {}\nRP = {}\nAN = {}\nRN = {}\nAT = {}\nRT = {}'.format(AP, RP, AN, RN, AT, RT))
+
+    print 'Finished.'

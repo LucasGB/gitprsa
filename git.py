@@ -1,4 +1,7 @@
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+import os
 
 user = ''
 token = ''
@@ -14,54 +17,111 @@ def get_repositories_by_forks(n):
 
 	return r.json()
 
-def get_closed_pull_request_numbers_from_repo(repositry):
-	print 'Fetching pull requests from %s' % (repositry)
+def get_closed_pull_request_numbers_from_repo(repository):
+	print 'Fetching pull requests from %s' % (repository)
 
-	full_name = repositry.split('/')
-	pull_requests = []
+	full_name = repository.split('/')
+
+	s = requests.Session()
+	retries = Retry(total=5, backoff_factor=1, status_forcelist=[ 502, 503, 504 ])
+	s.mount('https://', HTTPAdapter(max_retries=retries))
 
 	print ('https://api.github.com/repos/{}/{}/pulls?state=closed&page=1&per_page=100').format(full_name[0], full_name[1])	
-	response = requests.get( ('https://api.github.com/repos/{}/{}/pulls?state=closed&page=1&per_page=100').format(full_name[0], full_name[1]), auth=(user,token))
+	response = s.get( ('https://api.github.com/repos/{}/{}/pulls?state=closed&page=1&per_page=100').format(full_name[0], full_name[1]), auth=(user,token))
 
+	directory = 'repositories/{}_{}'.format(full_name[0], full_name[1])
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+	
 	while True:
-		if response.ok:
-			for pr in response.json():
-				#print str(pr["number"])
-				#pull_requests.append(str(pr["number"]))
-				with open('repositories/{}_{}.txt'.format(full_name[0], full_name[1]), 'a') as output:
-					output.write(str(pr["number"]) + '\n')
-		else:
-			print response.raise_for_status()
-			continue
+		for pr in response.json():
+			if not verify_presence_of_changed_files(repository, str(pr["number"])):
+				print 'No changed files'
+				continue
 
+			with open('{}/{}_{}_pull_request_numbers.txt'.format(directory, full_name[0], full_name[1]), 'a') as output:
+				output.write(str(pr["number"]) + '\n')
 		try:
 			print response.links['next']['url']
-			response = requests.get(response.links['next']['url'], auth=(user,token))
+			response = s.get(response.links['next']['url'], auth=(user,token))
 		except:
 			print 'KeyError: next link not found. Returning results'
 			break
 
 	print 'Done.'
 
-	return pull_requests
+def verify_presence_of_changed_files(repository, pull_request):
+	print 'Verifying presence of changed files in pull request: {}'.format(pull_request)
 
-def filter_by_presence_of_changed_files(pull_requests):
-	filtered_pull_requests = []
+	s = requests.Session()
+	retries = Retry(total=5, backoff_factor=1, status_forcelist=[ 502, 503, 504 ])
+	s.mount('https://', HTTPAdapter(max_retries=retries))
 
-	print 'Filtering pull requests by presence of changed files'
+	response = s.get('https://api.github.com/repos/{}/pulls/{}'.format(repository, pull_request), auth=(user,token))
 
-	for pull_request in pull_requests:
-		response = requests.get('https://api.github.com/repos/rails/rails/pulls/' + pull_request, auth=(user,token))
+	if response.json()["changed_files"] > 0:
+		return True
 
-		if response.ok:
-			if response.json()["changed_files"] > 0:
-				filtered_pull_requests.append(response.json())
+	print 'No presence of changed files'
+	return False
+
+def verify_acceptance(repository, pull_request):
+	print 'Verifying acceptance of pull request #{}'.format(pull_request)
+
+	s = requests.Session()
+	retries = Retry(total=5, backoff_factor=1, status_forcelist=[ 502, 503, 504 ])
+	s.mount('https://', HTTPAdapter(max_retries=retries))
+
+	response = s.get('https://api.github.com/repos/{}/pulls/{}'.format(repository, pull_request), auth=(user,token))
+
+	if response.json()["merged_at"] != None:
+		status = verify_presence_of_review_comments(response.json()["review_comments_url"])
+		print 'MERGED'
+		
+		if status == True:
+			return True
 		else:
-			return response.raise_for_status()
+			return None
+	else:
+		print 'NOT MERGED'
+		status = verify_presence_of_review_comments(response.json()["review_comments_url"])
 
-	print 'Done'
-	
-	return filtered_pull_requests
+		if status == True:
+			print 'HAS REVIEWS'
+			return False
+		else:
+			print 'DOESNT HAVE REVIEWS'
+			return None
+
+def verify_presence_of_review_comments(url):
+	print 'Verifying presence of review comments'
+
+	print url
+
+	s = requests.Session()
+	retries = Retry(total=5, backoff_factor=1, status_forcelist=[ 502, 503, 504 ])
+	s.mount('https://', HTTPAdapter(max_retries=retries))
+
+	response = s.get(url, auth=(user,token))
+
+	if len(response.json()) == 0:
+		return False
+
+	return True
+
+def verify_merged_at_attr_from_pull_request(repository, pull_request):
+	print 'Verifying if pull request #{} was merged'.format(pull_request)
+
+	s = requests.Session()
+	retries = Retry(total=5, backoff_factor=1, status_forcelist=[ 502, 503, 504 ])
+	s.mount('https://', HTTPAdapter(max_retries=retries))
+
+	response = s.get('https://api.github.com/repos/{}/pulls/{}'.format(repository, pull_request), auth=(user,token))
+
+	if response.json()["merged_at"] != None:
+		return True
+	else:
+		return False
 
 def get_comments_from_pull_request(pull_request):
 	r = requests.get('https://api.github.com/repos/rails/rails/issues/' + pull_request + '/comments')
