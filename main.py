@@ -89,25 +89,25 @@ if __name__ == '__main__':
           accepted_prs.append(line)
 
       print len(accepted_prs)
-      with open('repositories/{}_{}/{}_{}_rejected_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1]), 'r') as file:
-        for line in file.readlines():
-          rejected_prs.append(line)
-      print len(rejected_prs)
+#      with open('repositories/{}_{}/{}_{}_rejected_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1]), 'r') as file:
+#        for line in file.readlines():
+#          rejected_prs.append(line)
+#      print len(rejected_prs)
       sample_percentage = 0.2
 
       sample_accepted_prs = random.sample(accepted_prs, int(len(accepted_prs) * sample_percentage))
-      sample_rejected_prs = random.sample(rejected_prs, int(len(rejected_prs) * sample_percentage))
+#      sample_rejected_prs = random.sample(rejected_prs, int(len(rejected_prs) * sample_percentage))
 
-      print len(sample_accepted_prs)
-      print len(sample_rejected_prs)
+#      print len(sample_accepted_prs)
+#      print len(sample_rejected_prs)
 
       with open('repositories/{}_{}/{}_{}_sampled_{}_accepted_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1], int(sample_percentage * 100)), 'a') as output:
         for pr in sample_accepted_prs:
           output.write(pr)
 
-      with open('repositories/{}_{}/{}_{}_sampled_{}_rejected_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1], int(sample_percentage * 100)), 'a') as output:
-        for pr in sample_rejected_prs:
-          output.write(pr)
+#      with open('repositories/{}_{}/{}_{}_sampled_{}_rejected_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1], int(sample_percentage * 100)), 'a') as output:
+#        for pr in sample_rejected_prs:
+#          output.write(pr)
 
       '''
       AP = Accepted and merged, mostly positive comments
@@ -151,6 +151,7 @@ if __name__ == '__main__':
         else:
           RT += 1
 
+      '''
       for pr in sample_rejected_prs:
         review_comments = get_review_comments_from_pull_request(repository, pr)
         merged = verify_merged_at_attr_from_pull_request(repository, pr)
@@ -177,7 +178,7 @@ if __name__ == '__main__':
           AT += 1
         else:
           RT += 1
-
+      '''
       print AP
       print RP
       print AN

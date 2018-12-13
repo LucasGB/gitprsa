@@ -1,6 +1,9 @@
-AP = 162
+21690 PRs
+1438 Accepted and merged -> 20% = 287
+1438 Closed and unmerged -> 20% = 287
+AP = 262
 RP = 246
-AN = 7
+AN = 8
 RN = 20
-AT = 15
+AT = 17
 RT = 21
