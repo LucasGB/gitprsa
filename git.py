@@ -128,12 +128,16 @@ def get_comments_from_pull_request(pull_request):
 
 	return r.json
 
-def get_review_comments_from_pull_request(pull_request):
+def get_review_comments_from_pull_request(repository, pull_request):
 	print 'Fetching comments from pull request #' + pull_request
 
 	comments = []
 
-	response = requests.get('https://api.github.com/repos/rails/rails/pulls/' + pull_request + '/comments')
+	s = requests.Session()
+	retries = Retry(total=5, backoff_factor=1, status_forcelist=[ 502, 503, 504 ])
+	s.mount('https://', HTTPAdapter(max_retries=retries))
+
+	response = requests.get('https://api.github.com/repos/{}/pulls/{}/comments'.format(repository, pull_request), auth=(user, token))
 
 	if response.ok:
 		

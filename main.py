@@ -69,12 +69,12 @@ if __name__ == '__main__':
            for line in file.readlines():
             pull_requests.append(line)
 
-      for pull_request in pull_requests:
-        status = verify_acceptance(repository, pull_request)
+#      for pull_request in pull_requests:
+#         status = verify_acceptance(repository, pull_request)
 
-        if status == True:
-          with open('repositories/{}_{}/{}_{}_accepted_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1]), 'a') as output:
-            output.write(pull_request)
+#        if status == True:
+#          with open('repositories/{}_{}/{}_{}_accepted_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1]), 'a') as output:
+#            output.write(pull_request)
 #        elif status == False:
 #          with open('repositories/{}_{}/{}_{}_rejected_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1]), 'a') as output:
 #            output.write(pull_request)
@@ -86,7 +86,6 @@ if __name__ == '__main__':
 
       with open('repositories/{}_{}/{}_{}_accepted_prs.txt'.format(full_name[0], full_name[1], full_name[0], full_name[1]), 'r') as file:
         for line in file.readlines():
-          print 'a'
           accepted_prs.append(line)
 
       print len(accepted_prs)
@@ -126,8 +125,34 @@ if __name__ == '__main__':
       RT = 0
 
       for pr in sample_accepted_prs:
-        review_comments = get_review_comments_from_pull_request(pr)
-        print 'N comments: ',len(review_comments)
+        review_comments = get_review_comments_from_pull_request(repository, pr)
+        merged = verify_merged_at_attr_from_pull_request(repository, pr)
+
+        review_polarities = classify(review_comments)
+
+        print review_polarities[0]
+
+        n_positive_comments = review_polarities.count(0)
+        n_negative_comments = review_polarities.count(-1)
+
+        print 'POS: ',n_positive_comments
+        print 'NEG: ',n_negative_comments
+
+        if n_positive_comments > n_negative_comments and merged == True:
+          AP += 1
+        elif n_positive_comments > n_negative_comments and merged == False:
+          RP += 1
+        elif n_negative_comments > n_positive_comments and merged == True:
+          AN += 1
+        elif n_negative_comments > n_positive_comments and merged == False:
+          RN += 1
+        elif n_positive_comments == n_negative_comments and merged == True:
+          AT += 1
+        else:
+          RT += 1
+
+      for pr in sample_rejected_prs:
+        review_comments = get_review_comments_from_pull_request(repository, pr)
         merged = verify_merged_at_attr_from_pull_request(repository, pr)
 
         review_polarities = classify(review_comments)
